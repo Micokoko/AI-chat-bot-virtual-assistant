@@ -52,7 +52,7 @@ function ChatApp() {
       setIsLoading(true); // Show loader
 
       try {
-        const response = await axios.post('http://localhost:5000/chat', {
+        const response = await axios.post('https://ai-chat-bot-virtual-assistant.onrender.com/chat', {
           message: message,
         });
 
