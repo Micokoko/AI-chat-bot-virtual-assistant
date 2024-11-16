@@ -1,3 +1,25 @@
+const express = require('express');
+const axios = require('axios');
+require('dotenv').config();
+const cors = require('cors');
+
+const app = express();
+const port = process.env.PORT || 5000;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Task state to maintain a simple in-memory store
+const taskState = {
+  todo: [], // Tasks that need to be done
+  completed: [], // Tasks that have been completed
+};
+
+// Store conversation history
+let conversationHistory = [];
+
+// Route for AI-powered task management
 app.post('/chat', async (req, res) => {
   const userMessage = req.body.message;
 
@@ -81,4 +103,9 @@ app.post('/chat', async (req, res) => {
     console.error('Error communicating with OpenAI:', error.response ? error.response.data : error.message);
     return res.status(500).json({ error: 'Error communicating with the AI' });
   }
+});
+
+// Start the server
+app.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
 });
