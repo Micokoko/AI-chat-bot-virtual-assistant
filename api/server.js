@@ -1,25 +1,3 @@
-const express = require('express');
-const axios = require('axios');
-require('dotenv').config();
-const cors = require('cors');
-
-const app = express();
-const port = process.env.PORT || 5000;
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// Task state to maintain a simple in-memory store
-const taskState = {
-  todo: [], // Tasks that need to be done
-  completed: [], // Tasks that have been completed
-};
-
-// Store conversation history
-let conversationHistory = [];
-
-// Route for AI-powered task management
 app.post('/chat', async (req, res) => {
   const userMessage = req.body.message;
 
@@ -70,41 +48,37 @@ app.post('/chat', async (req, res) => {
     // Add the AI response to the conversation history
     conversationHistory.push({ role: 'assistant', content: aiResponse });
 
-    // Parse AI response for actions
+    // Check if the AI response contains instructions to add or complete a task
+    let task;
     if (aiResponse.toLowerCase().startsWith('add task:')) {
-      // Extract task description from AI response
-      const task = aiResponse.replace(/^Add task:\s*/i, '').trim();
+      // Extract task description from the response
+      task = aiResponse.replace(/^Add task:\s*/i, '').trim();
 
       // Avoid adding duplicate tasks
       if (!taskState.todo.includes(task) && !taskState.completed.includes(task)) {
         taskState.todo.push(task); // Add the task to the to-do list
-        res.json({ message: `Task added successfully: ${task}`, task, completed: false });
+        return res.json({ message: `Task added successfully: ${task}`, task, completed: false });
       } else {
-        res.json({ message: `Task "${task}" already exists.` });
+        return res.json({ message: `Task "${task}" already exists.` });
       }
     } else if (aiResponse.toLowerCase().startsWith('complete task:')) {
       // Extract task description to mark it as complete
-      const task = aiResponse.replace(/^Complete task:\s*/i, '').trim();
+      task = aiResponse.replace(/^Complete task:\s*/i, '').trim();
 
       // Mark task as completed if it exists in the to-do list
       if (taskState.todo.includes(task)) {
         taskState.todo = taskState.todo.filter((t) => t !== task); // Remove task from to-do list
         taskState.completed.push(task); // Add it to completed tasks
-        res.json({ message: `Task marked as completed: ${task}`, task, completed: true });
+        return res.json({ message: `Task marked as completed: ${task}`, task, completed: true });
       } else {
-        res.json({ message: `Task "${task}" not found in the to-do list.` });
+        return res.json({ message: `Task "${task}" not found in the to-do list.` });
       }
     } else {
       // Handle non-task related inquiries or conversational flow
-      res.json({ message: aiResponse });
+      return res.json({ message: aiResponse });
     }
   } catch (error) {
     console.error('Error communicating with OpenAI:', error.response ? error.response.data : error.message);
-    res.status(500).json({ error: 'Error communicating with the AI' });
+    return res.status(500).json({ error: 'Error communicating with the AI' });
   }
-});
-
-// Start the server
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
 });
