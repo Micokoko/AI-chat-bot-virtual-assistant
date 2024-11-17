@@ -18,15 +18,20 @@ const taskState = {
 
 // Store conversation history per user (based on session ID or user ID)
 const userConversationHistory = {}; // Stores history for each user
+const MAX_HISTORY_LENGTH = 50; // Limit conversation history for performance
 
 // Route for AI-powered task management
 app.post('/chat', async (req, res) => {
   const userMessage = req.body.message;
-  const userId = req.body.userId || 'default';  // User identifier (can be session ID or user ID)
+  const userId = req.body.userId || 'default'; // User identifier (can be session ID or user ID)
 
   // Validate input
   if (!userMessage || typeof userMessage !== 'string') {
     return res.status(400).json({ error: 'Invalid input message' });
+  }
+
+  if (!/^[a-zA-Z0-9_-]+$/.test(userId)) {
+    return res.status(400).json({ error: 'Invalid userId format' });
   }
 
   try {
@@ -51,6 +56,11 @@ app.post('/chat', async (req, res) => {
 
     // Add the system prompt and user message to the conversation history
     userConversationHistory[userId].push({ role: 'user', content: userMessage });
+
+    // Limit the history length
+    if (userConversationHistory[userId].length > MAX_HISTORY_LENGTH) {
+      userConversationHistory[userId] = userConversationHistory[userId].slice(-MAX_HISTORY_LENGTH);
+    }
 
     // Prepare messages for OpenAI, including the entire chat history for context
     const messages = [systemPrompt, ...userConversationHistory[userId]];
