@@ -1,5 +1,6 @@
 const express = require('express');
 const axios = require('axios');
+const session = require('express-session');
 require('dotenv').config();
 const cors = require('cors');
 
@@ -7,8 +8,23 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'https://miraibot-gamma.vercel.app/', // Replace with your frontend origin
+  credentials: true, // Allow cookies to be sent from the client
+}));
 app.use(express.json());
+
+// Session setup
+app.use(session({
+  secret: process.env.SESSION_SECRET || `${process.env.OPENAI_API_KEY}`, // Replace with a strong secret
+  resave: false, // Avoid resaving session if nothing has changed
+  saveUninitialized: true, // Save uninitialized sessions
+  cookie: {
+    httpOnly: true, // Prevent client-side script access
+    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    maxAge: 24 * 60 * 60 * 1000, // Set cookie expiry to 1 day
+  },
+}));
 
 // Task state to maintain a simple in-memory store
 const taskState = {
@@ -16,30 +32,21 @@ const taskState = {
   completed: [], // Tasks that have been completed
 };
 
-// Store conversation history per user (based on session ID or user ID)
-const userConversationHistory = {}; // Stores history for each user
-const MAX_HISTORY_LENGTH = 50; // Limit conversation history for performance
-
 // Route for AI-powered task management
 app.post('/chat', async (req, res) => {
   const userMessage = req.body.message;
-  const userId = req.body.userId || 'default'; // User identifier (can be session ID or user ID)
 
   // Validate input
   if (!userMessage || typeof userMessage !== 'string') {
     return res.status(400).json({ error: 'Invalid input message' });
   }
 
-  if (!/^[a-zA-Z0-9_-]+$/.test(userId)) {
-    return res.status(400).json({ error: 'Invalid userId format' });
+  // Retrieve or initialize session conversation history
+  if (!req.session.conversationHistory) {
+    req.session.conversationHistory = [];
   }
 
   try {
-    // Fetch the user's conversation history, or initialize a new one if none exists
-    if (!userConversationHistory[userId]) {
-      userConversationHistory[userId] = [];
-    }
-
     // System prompt to provide task state context and allow conversational flow
     const systemPrompt = {
       role: 'system',
@@ -55,15 +62,16 @@ app.post('/chat', async (req, res) => {
     };
 
     // Add the system prompt and user message to the conversation history
-    userConversationHistory[userId].push({ role: 'user', content: userMessage });
+    req.session.conversationHistory.push({ role: 'user', content: userMessage });
 
     // Limit the history length
-    if (userConversationHistory[userId].length > MAX_HISTORY_LENGTH) {
-      userConversationHistory[userId] = userConversationHistory[userId].slice(-MAX_HISTORY_LENGTH);
+    const MAX_HISTORY_LENGTH = 50;
+    if (req.session.conversationHistory.length > MAX_HISTORY_LENGTH) {
+      req.session.conversationHistory = req.session.conversationHistory.slice(-MAX_HISTORY_LENGTH);
     }
 
     // Prepare messages for OpenAI, including the entire chat history for context
-    const messages = [systemPrompt, ...userConversationHistory[userId]];
+    const messages = [systemPrompt, ...req.session.conversationHistory];
 
     // Make OpenAI API call
     const openaiResponse = await axios.post(
@@ -84,7 +92,7 @@ app.post('/chat', async (req, res) => {
     const aiResponse = openaiResponse.data.choices[0].message.content.trim();
 
     // Add the AI response to the conversation history
-    userConversationHistory[userId].push({ role: 'assistant', content: aiResponse });
+    req.session.conversationHistory.push({ role: 'assistant', content: aiResponse });
 
     // Check if the AI response contains instructions to add or complete a task
     let task;
