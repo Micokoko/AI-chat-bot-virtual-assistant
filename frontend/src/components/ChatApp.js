@@ -86,7 +86,7 @@ function ChatApp() {
           { text: 'Sorry, there was an error. Please try again.', fromUser: false },
         ]);
       } finally {
-        setIsLoading(false); // Hide loader once the response is received
+        setIsLoading(false); 
       }
     }
   };
@@ -116,14 +116,14 @@ function ChatApp() {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen m-4 mb-4">
+    <div className="flex justify-center items-center h-1/2 m-4 mb-4">
       <div className="bg-white rounded-lg shadow-xl h-full w-full max-w-4xl space-y-6">
         <div className="flex flex-col md:flex-row w-full h-full space-y-6 md:space-y-0">
           {/* Chat Feed */}
-          <div className="md:w-1/2 p-4 min-h-96  bg-white rounded-lg shadow-md flex flex-col space-y-4 border border-gray-300">
+          <div className="md:w-1/2 p-4 h-auto overflow-y-hidden bg-white rounded-lg shadow-md flex flex-col space-y-4 border border-gray-300">
             <div
               ref={chatFeedRef}
-              className="flex flex-col space-y-4 flex-grow text-left overflow-auto"
+              className="flex flex-col h-64 space-y-4 overflow-y-scroll flex-grow text-left"
             >
               {messages.map((msg, index) => (
                 <div
@@ -177,11 +177,11 @@ function ChatApp() {
               {/* To-Do Section */}
               <div className="border-b border-gray-300 pb-32">
                 <h2 className="text-xl font-semibold mb-2">To-Do</h2>
-                <div className="h-64 overflow-y-scroll">
+                <div className="h-64 overflow-y-scroll bg-gray-50">
                   {todoList.todo.length === 0 ? (
                     <p>No existing entries</p>
                   ) : (
-                    <table className="text-left w-full table-auto ">
+                    <table className="text-left w-full table-auto">
                       <thead>
                         <tr>
                           <th className="text-left p-2">Task Description</th>
@@ -217,7 +217,7 @@ function ChatApp() {
               {/* Completed Section */}
               <div className="border-t border-gray-300 pt-4">
                 <h2 className="text-xl font-semibold mb-2">Completed</h2>
-                <div className="h-64 overflow-y-scroll">
+                <div className="h-64 overflow-y-scroll bg-gray-50">
                   {todoList.completed.length === 0 ? (
                     <p>No existing entries</p>
                   ) : (
