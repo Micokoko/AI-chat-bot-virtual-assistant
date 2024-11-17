@@ -86,7 +86,7 @@ function ChatApp() {
           { text: 'Sorry, there was an error. Please try again.', fromUser: false },
         ]);
       } finally {
-        setIsLoading(false); 
+        setIsLoading(false);
       }
     }
   };
@@ -116,142 +116,133 @@ function ChatApp() {
   };
 
   return (
-    <div className="flex justify-center items-center h-1/2 m-4 mb-4">
-      <div className="bg-white rounded-lg shadow-xl h-full w-full max-w-4xl space-y-6">
-        <div className="flex flex-col md:flex-row w-full h-full space-y-6 md:space-y-0">
-          {/* Chat Feed */}
-          <div className="md:w-1/2 p-4 h-auto overflow-y-hidden bg-white rounded-lg shadow-md flex flex-col space-y-4 border border-gray-300">
-            <div
-              ref={chatFeedRef}
-              className="flex flex-col h-64 space-y-4 overflow-y-scroll flex-grow text-left"
-            >
-              {messages.map((msg, index) => (
-                <div
-                  key={index}
-                  className={`flex ${msg.fromUser ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-xs p-3 rounded-lg ${msg.fromUser ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-900'}`}
-                  >
-                    {msg.text}
-                  </div>
-                </div>
-              ))}
-
-              {/* Show loader if AI is processing */}
-              {isLoading && (
-                <div className="flex justify-start">
-                  <div className="max-w-xs p-3 rounded-lg bg-gray-200 text-gray-900">
-                    <div className="flex justify-center items-center space-x-2">
-                      <div className="w-3 h-3 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                      <span>AI is typing...</span>
-                    </div>
-                  </div>
-                </div>
-              )}
+<div className="flex justify-center items-center h-screen m-4 mb-4 bg-gray-900">
+  <div className="bg-gray-800 rounded-lg shadow-xl h-full w-full max-w-4xl space-y-6">
+    <div className="flex flex-col md:flex-row w-full h-full space-y-6 md:space-y-0">
+      {/* Chat Section */}
+      <div className="md:w-1/2 p-4 min-h-96 bg-gray-800 rounded-lg shadow-md flex flex-col space-y-4 border border-gray-700">
+        <div ref={chatFeedRef} className="flex flex-col space-y-4 flex-grow text-left overflow-auto">
+          {messages.map((msg, index) => (
+            <div key={index} className={`flex ${msg.fromUser ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-xs p-3 rounded-lg ${msg.fromUser ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'}`}>
+                {msg.text}
+              </div>
             </div>
+          ))}
 
-            {/* Input Section */}
-            <div className="flex items-center mt-4 space-x-2">
-              <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Type a message"
-                className="w-full p-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500"
-              />
-              <button
-                onClick={handleSend}
-                className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none"
-              >
-                Send
-              </button>
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="max-w-xs p-3 rounded-lg bg-gray-700 text-gray-300">
+                <div className="flex justify-center items-center space-x-2">
+                  <div className="w-3 h-3 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  <span>AI is typing...</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center mt-4 space-x-2">
+          <input
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Type a message"
+            className="w-full p-3 rounded-lg border-2 border-gray-700 focus:outline-none focus:border-blue-500 bg-gray-900 text-white"
+          />
+          <button
+            onClick={handleSend}
+            className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none"
+          >
+            Send
+          </button>
+        </div>
+      </div>
+
+      {/* Task List Section */}
+      <div className="md:w-1/2 p-4 bg-gray-800 rounded-lg shadow-md flex flex-col space-y-4 border border-gray-700">
+        <h1 className="text-2xl font-extrabold mb-2 text-white">TASK LIST</h1>
+        <div className="flex flex-col space-y-6 flex-grow">
+          {/* To-Do Section */}
+          <div className="border-b border-gray-700 pb-32">
+            <h2 className="text-xl font-semibold mb-2 text-white">To-Do</h2>
+            <div className="h-64 overflow-y-scroll">
+              {todoList.todo.length === 0 ? (
+                <p className="text-gray-400">No existing entries</p>
+              ) : (
+                <table className="text-left w-full table-auto text-white">
+                  <thead>
+                    <tr>
+                      <th className="text-left p-2">Task Description</th>
+                      <th className="text-center p-2">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {todoList.todo.map((task, index) => (
+                      <tr key={index}>
+                        <td className="p-2">{task}</td>
+                        <td className="p-2 space-x-2 text-center">
+                          <button
+                            onClick={() => handleComplete(task)}
+                            className="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+                          >
+                            Complete
+                          </button>
+                          <button
+                            onClick={() => handleDelete(task)}
+                            className="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
 
-          {/* Task List */}
-          <div className="md:w-1/2 p-4 bg-white rounded-lg shadow-md flex flex-col space-y-4 border border-gray-300">
-            <h1 className="text-2xl font-extrabold mb-2">TASK LIST</h1>
-            <div className="flex flex-col space-y-6 flex-grow">
-              {/* To-Do Section */}
-              <div className="border-b border-gray-300 pb-32">
-                <h2 className="text-xl font-semibold mb-2">To-Do</h2>
-                <div className="h-64 overflow-y-scroll bg-gray-50">
-                  {todoList.todo.length === 0 ? (
-                    <p>No existing entries</p>
-                  ) : (
-                    <table className="text-left w-full table-auto">
-                      <thead>
-                        <tr>
-                          <th className="text-left p-2">Task Description</th>
-                          <th className="text-center p-2">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {todoList.todo.map((task, index) => (
-                          <tr key={index}>
-                            <td className="p-2">{task}</td>
-                            <td className="p-2 space-x-2 text-center">
-                              <button
-                                onClick={() => handleComplete(task)}
-                                className="bg-green-500 text-white px-2 py-1 rounded"
-                              >
-                                Complete
-                              </button>
-                              <button
-                                onClick={() => handleDelete(task)}
-                                className="bg-red-500 text-white px-2 py-1 rounded"
-                              >
-                                Delete
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-              </div>
-
-              {/* Completed Section */}
-              <div className="border-t border-gray-300 pt-4">
-                <h2 className="text-xl font-semibold mb-2">Completed</h2>
-                <div className="h-64 overflow-y-scroll bg-gray-50">
-                  {todoList.completed.length === 0 ? (
-                    <p>No existing entries</p>
-                  ) : (
-                    <table className="text-left w-full table-auto">
-                      <thead>
-                        <tr>
-                          <th className="text-left p-2">Task Description</th>
-                          <th className="text-left p-2">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {todoList.completed.map((task, index) => (
-                          <tr key={index}>
-                            <td className="p-2">{task}</td>
-                            <td className="p-2 space-x-2">
-                              <button
-                                onClick={() => handleDelete(task)}
-                                className="bg-red-500 text-white px-2 py-1 rounded"
-                              >
-                                Delete
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-              </div>
+          {/* Completed Section */}
+          <div className="border-t border-gray-700 pt-4">
+            <h2 className="text-xl font-semibold mb-2 text-white">Completed</h2>
+            <div className="h-64 overflow-y-scroll">
+              {todoList.completed.length === 0 ? (
+                <p className="text-gray-400">No existing entries</p>
+              ) : (
+                <table className="text-left w-full table-auto text-white">
+                  <thead>
+                    <tr>
+                      <th className="text-left p-2">Task Description</th>
+                      <th className="text-left p-2">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {todoList.completed.map((task, index) => (
+                      <tr key={index}>
+                        <td className="p-2">{task}</td>
+                        <td className="p-2 space-x-2">
+                          <button
+                            onClick={() => handleDelete(task)}
+                            className="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
+</div>
+
   );
 }
 

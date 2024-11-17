@@ -4,7 +4,7 @@ import ChatApp from './components/ChatApp';
 
 function App() {
   return (
-    <div className="App">
+    <div className="App bg-gray-900">
       <ChatApp />
     </div>
   );
