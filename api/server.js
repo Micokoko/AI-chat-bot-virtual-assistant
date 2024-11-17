@@ -16,12 +16,13 @@ const taskState = {
   completed: [], // Tasks that have been completed
 };
 
-// Store conversation history
-let conversationHistory = [];
+// Store conversation history per user (based on session ID or user ID)
+const userConversationHistory = {}; // Stores history for each user
 
 // Route for AI-powered task management
 app.post('/chat', async (req, res) => {
   const userMessage = req.body.message;
+  const userId = req.body.userId || 'default';  // User identifier (can be session ID or user ID)
 
   // Validate input
   if (!userMessage || typeof userMessage !== 'string') {
@@ -29,6 +30,11 @@ app.post('/chat', async (req, res) => {
   }
 
   try {
+    // Fetch the user's conversation history, or initialize a new one if none exists
+    if (!userConversationHistory[userId]) {
+      userConversationHistory[userId] = [];
+    }
+
     // System prompt to provide task state context and allow conversational flow
     const systemPrompt = {
       role: 'system',
@@ -44,10 +50,10 @@ app.post('/chat', async (req, res) => {
     };
 
     // Add the system prompt and user message to the conversation history
-    conversationHistory.push({ role: 'user', content: userMessage });
+    userConversationHistory[userId].push({ role: 'user', content: userMessage });
 
     // Prepare messages for OpenAI, including the entire chat history for context
-    const messages = [systemPrompt, ...conversationHistory];
+    const messages = [systemPrompt, ...userConversationHistory[userId]];
 
     // Make OpenAI API call
     const openaiResponse = await axios.post(
@@ -68,7 +74,7 @@ app.post('/chat', async (req, res) => {
     const aiResponse = openaiResponse.data.choices[0].message.content.trim();
 
     // Add the AI response to the conversation history
-    conversationHistory.push({ role: 'assistant', content: aiResponse });
+    userConversationHistory[userId].push({ role: 'assistant', content: aiResponse });
 
     // Check if the AI response contains instructions to add or complete a task
     let task;
