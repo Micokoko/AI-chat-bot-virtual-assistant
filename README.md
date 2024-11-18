@@ -4,6 +4,8 @@
 
 MiraiBOT is your AI-powered virtual assistant that not only tracks your tasks but also serves as a helpful AI companion, capable of providing a vast amount of information. With integrated OpenAI API, MiraiBOT is ready to assist you with anything from managing your to-do list to offering insightful responses to your queries.
 
+You can check out the live demo of MiraiBOT here: [MiraiBOT Live Demo](https://miraibot-gamma.vercel.app/)
+
 ---
 
 ## Key Features
